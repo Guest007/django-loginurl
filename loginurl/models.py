@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 
@@ -12,7 +12,7 @@ class Key(models.Model):
     """
     A simple key store.
     """
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
     key = models.CharField(max_length=40, unique=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     usage_left = models.IntegerField(null=True, blank=True, default=1)
@@ -51,4 +51,3 @@ class Key(models.Model):
         if self.usage_left is not None and self.usage_left > 0:
             self.usage_left -= 1
             self.save()
-
