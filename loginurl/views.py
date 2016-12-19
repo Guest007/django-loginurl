@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseGone
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import auth
 from django.conf import settings
 
