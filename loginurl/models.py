@@ -7,6 +7,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 from loginurl.utils import create_key
 
+
 @python_2_unicode_compatible
 class Key(models.Model):
     """
@@ -20,7 +21,7 @@ class Key(models.Model):
     next = models.CharField(null=True, blank=True, max_length=200)
 
     def __str__(self):
-        return '{} ({})'.format(self.key, self.user.get_username())
+        return u'{} ({})'.format(self.key, self.user.get_username())
 
     def save(self, *args, **kwargs):
         if not self.key:

@@ -5,12 +5,14 @@ from django.conf import settings
 from loginurl import utils
 from loginurl.models import Key
 
+
 def cleanup(request):
     """
     Remove expired keys.
     """
     utils.cleanup()
     return HttpResponse('ok', content_type='text/plain')
+
 
 def login(request, key):
     """
@@ -32,9 +34,9 @@ def login(request, key):
     specified in ``settings.LOGIN_REDIRECT_URL``. Any value in the ``next``
     parameter in the query string will be also forwarded.
     """
-    next = request.GET.get('next', None)
-    if next is None:
-        next = settings.LOGIN_REDIRECT_URL
+    _next = request.GET.get('next', None)
+    if _next is None:
+        _next = settings.LOGIN_REDIRECT_URL
 
     # Validate the key through the standard Django's authentication mechanism.
     # It also means that the authentication backend of this django-loginurl
@@ -42,8 +44,8 @@ def login(request, key):
     user = auth.authenticate(key=key)
     if user is None:
         url = settings.LOGIN_URL
-        if next is not None:
-            url = '{}?next={}'.format(url, next)
+        if _next is not None:
+            url = '{}?next={}'.format(url, _next)
         return HttpResponseRedirect(url)
 
     # The key is valid, then now log the user in.
@@ -54,7 +56,7 @@ def login(request, key):
     data.update_usage()
 
     if data.next is not None:
-        next = data.next
+        _next = data.next
 
-    return HttpResponseRedirect(next)
+    return HttpResponseRedirect(_next)
 
