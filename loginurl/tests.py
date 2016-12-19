@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from mock import Mock, patch
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.utils.http import int_to_base36, base36_to_int
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseGone
@@ -13,12 +13,14 @@ from django.core import management
 from loginurl.models import Key
 from loginurl import utils, backends, views
 
+
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         Key.objects.all().delete()
-        User.objects.all().delete()
-        self.user = User.objects.create_user('test', 'test@example.com',
+        get_user_model().objects.all().delete()
+        self.user = get_user_model().objects.create_user('test', 'test@example.com',
                                              'password')
+
 
 class CreateKeyTestCase(BaseTestCase):
     def testDefault(self):

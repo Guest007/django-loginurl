@@ -1,8 +1,9 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from loginurl.models import Key
 
-class LoginUrlBackend:
+
+class LoginUrlBackend(object):
     """
     Authentication backend that checks the given ``key`` to a record in the
     ``Key`` model. If the record is found, then ``is_valid()`` method is called
@@ -26,8 +27,8 @@ class LoginUrlBackend:
         return data.user
 
     def get_user(self, user_id):
+        user_model = get_user_model()
         try:
-            return User.objects.get(pk=user_id)
-        except User.DoesNotExist:
+            return user_model.objects.get(pk=user_id)
+        except user_model.DoesNotExist:
             return None
-        
