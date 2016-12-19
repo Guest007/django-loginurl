@@ -18,8 +18,8 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         Key.objects.all().delete()
         get_user_model().objects.all().delete()
-        self.user = get_user_model().objects.create_user('test', 'test@example.com',
-                                             'password')
+        self.user = get_user_model().objects.create_user(
+            'test', 'test@example.com', 'password')
 
 
 class CreateKeyTestCase(BaseTestCase):
@@ -100,36 +100,43 @@ class CleanUpTestCase(BaseTestCase):
 class ModelCheckValidTestCase(BaseTestCase):
     def testPositive(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=1, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=1,
+                                  expires=oneweek)
         self.assertTrue(data.is_valid())
 
     def testZero(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=0, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=0,
+                                  expires=oneweek)
         self.assertFalse(data.is_valid())
 
     def testNegative(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=-1, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=-1,
+                                  expires=oneweek)
         self.assertFalse(data.is_valid())
 
     def testValid(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=1, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=1,
+                                  expires=oneweek)
         self.assertTrue(data.is_valid())
 
     def testExpired(self):
         oneweekago = timezone.now() - timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=1, expires=oneweekago)
+        data = Key.objects.create(user=self.user, usage_left=1,
+                                  expires=oneweekago)
         self.assertFalse(data.is_valid())
 
     def testAlwaysValid(self):
-        data = Key.objects.create(user=self.user, usage_left=None, expires=None)
+        data = Key.objects.create(user=self.user, usage_left=None,
+                                  expires=None)
         self.assertTrue(data.is_valid())
 
     def testBothInvalid(self):
         oneweekago = timezone.now() - timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=-1, expires=oneweekago)
+        data = Key.objects.create(user=self.user, usage_left=-1,
+                                  expires=oneweekago)
         self.assertFalse(data.is_valid())
 
 
