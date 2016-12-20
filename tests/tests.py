@@ -50,6 +50,13 @@ class CreateKeyTestCase(BaseTestCase):
         data = utils.create(self.user, next=next)
         self.assertEqual(data.next, next)
 
+    def testCustomCreateTokenLoaded(self):
+        old = utils._create_token
+        with patch.object(settings, 'DJANGO_LOGINURL_CREATE_TOKEN',
+                          'test_project.utils.create_token', create=True):
+            reload(utils)
+        assert utils._create_token is not old
+
 
 class CleanUpTestCase(BaseTestCase):
     def testPositive(self):
