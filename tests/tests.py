@@ -3,22 +3,24 @@ from datetime import timedelta
 
 from mock import Mock, patch
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django.utils.http import int_to_base36, base36_to_int
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseGone
+from django.utils.http import int_to_base36
+from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.core import management
 
 from loginurl.models import Key
 from loginurl import utils, backends, views
 
+
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         Key.objects.all().delete()
-        User.objects.all().delete()
-        self.user = User.objects.create_user('test', 'test@example.com',
-                                             'password')
+        get_user_model().objects.all().delete()
+        self.user = get_user_model().objects.create_user(
+            'test', 'test@example.com', 'password')
+
 
 class CreateKeyTestCase(BaseTestCase):
     def testDefault(self):
@@ -47,6 +49,14 @@ class CreateKeyTestCase(BaseTestCase):
         next = '/next/page/'
         data = utils.create(self.user, next=next)
         self.assertEqual(data.next, next)
+
+    def testCustomCreateTokenLoaded(self):
+        old = utils._create_token
+        with patch.object(settings, 'DJANGO_LOGINURL_CREATE_TOKEN',
+                          'test_project.utils.create_token', create=True):
+            reload(utils)
+        assert utils._create_token is not old
+
 
 class CleanUpTestCase(BaseTestCase):
     def testPositive(self):
@@ -93,40 +103,49 @@ class CleanUpTestCase(BaseTestCase):
         utils.cleanup()
         self.assertEqual(len(Key.objects.all()), 1)
 
+
 class ModelCheckValidTestCase(BaseTestCase):
     def testPositive(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=1, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=1,
+                                  expires=oneweek)
         self.assertTrue(data.is_valid())
 
     def testZero(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=0, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=0,
+                                  expires=oneweek)
         self.assertFalse(data.is_valid())
 
     def testNegative(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=-1, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=-1,
+                                  expires=oneweek)
         self.assertFalse(data.is_valid())
 
     def testValid(self):
         oneweek = timezone.now() + timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=1, expires=oneweek)
+        data = Key.objects.create(user=self.user, usage_left=1,
+                                  expires=oneweek)
         self.assertTrue(data.is_valid())
 
     def testExpired(self):
         oneweekago = timezone.now() - timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=1, expires=oneweekago)
+        data = Key.objects.create(user=self.user, usage_left=1,
+                                  expires=oneweekago)
         self.assertFalse(data.is_valid())
 
     def testAlwaysValid(self):
-        data = Key.objects.create(user=self.user, usage_left=None, expires=None)
+        data = Key.objects.create(user=self.user, usage_left=None,
+                                  expires=None)
         self.assertTrue(data.is_valid())
 
     def testBothInvalid(self):
         oneweekago = timezone.now() - timedelta(days=7)
-        data = Key.objects.create(user=self.user, usage_left=-1, expires=oneweekago)
+        data = Key.objects.create(user=self.user, usage_left=-1,
+                                  expires=oneweekago)
         self.assertFalse(data.is_valid())
+
 
 class ModelUpdateUsageTestCase(BaseTestCase):
     def testDefault(self):
@@ -174,6 +193,7 @@ class ModelUpdateUsageTestCase(BaseTestCase):
         datadb = Key.objects.get(key=data.key)
         self.assertEqual(datadb.usage_left, -100)
 
+
 class BackendTestCase(BaseTestCase):
     def setUp(self):
         self.backend = backends.LoginUrlBackend()
@@ -204,6 +224,7 @@ class BackendTestCase(BaseTestCase):
         user = self.backend.get_user(self.user.id)
         self.assertEqual(user, self.user)
 
+
 class ViewCleanUpTestCase(unittest.TestCase):
     def testCleanUp(self):
         mock = Mock()
@@ -217,6 +238,7 @@ class ViewCleanUpTestCase(unittest.TestCase):
         self.assertTrue(mock.called)
         self.assertTrue(isinstance(res, HttpResponse))
         self.assertTrue(res.status_code, 200)
+
 
 class ViewLoginTestCae(BaseTestCase):
     def testDefault(self):
@@ -342,9 +364,9 @@ class ViewLoginTestCae(BaseTestCase):
         self.assertTrue(isinstance(res, HttpResponseRedirect))
         self.assertEqual(res['Location'], next)
 
+
 class CommandTestCase(unittest.TestCase):
     def testCall(self):
-        from loginurl.management.commands import loginurl_cleanup
 
         mock = Mock()
 
