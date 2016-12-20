@@ -11,7 +11,9 @@ from django.utils.http import int_to_base36
 
 create_token_path = getattr(settings, 'DJANGO_LOGINURL_CREATE_TOKEN', None)
 
-if not create_token_path:
+if create_token_path:
+    _create_token = import_string(create_token_path)
+else:
     def _create_token(user):
         """Create a unique token for a user.
 
@@ -22,8 +24,6 @@ if not create_token_path:
         _id = '{}-{}'.format(user.id, str(uuid.uuid4()))
         _hash = hashlib.md5(_id.encode('ascii'))
         return _hash.hexdigest()
-else:
-    _create_token = import_string(create_token_path)
 
 
 def create_key(user):
