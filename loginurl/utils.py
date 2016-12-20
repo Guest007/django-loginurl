@@ -4,19 +4,27 @@ import hashlib
 from django.db.models import Q
 from django.conf import settings
 from django.utils import timezone
+from django.utils.module_loading import import_string
+
 from django.utils.http import int_to_base36
 
-def _create_token(user):
-    """
-    Create a unique token for a user.
 
-    The token is created from the user id and a unique id generated
-    from UUIDv4. Then both are hashed using MD5 digest algorithm.
-    """
-    id = '{}-{}'.format(user.id, str(uuid.uuid4()))
-    hash = hashlib.md5(id.encode('ascii'))
-    hash.digest()
-    return hash.hexdigest()
+create_token_path = getattr(settings, 'DJANGO_LOGINURL_CREATE_TOKEN', None)
+
+if not create_token_path:
+    def _create_token(user):
+        """Create a unique token for a user.
+
+        The token is created from the user id and a unique id generated
+        from UUIDv4. Then both are hashed using MD5 digest algorithm.
+
+        """
+        _id = '{}-{}'.format(user.id, str(uuid.uuid4()))
+        _hash = hashlib.md5(_id.encode('ascii'))
+        return _hash.hexdigest()
+else:
+    _create_token = import_string(create_token_path)
+
 
 def create_key(user):
     token = _create_token(user)
@@ -24,6 +32,7 @@ def create_key(user):
     key = '{}-{}'.format(b36_uid, token)
 
     return key
+
 
 def create(user, usage_left=1, expires=None, next=None):
     """
@@ -73,6 +82,7 @@ def create(user, usage_left=1, expires=None, next=None):
 
     return data
 
+
 def cleanup():
     """
     Remove expired keys.
@@ -89,4 +99,3 @@ def cleanup():
                               Q(expires__lt=timezone.now()))
     if data is not None:
         data.delete()
-
