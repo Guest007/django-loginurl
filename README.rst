@@ -39,8 +39,18 @@ Configuration
    backend. See
    http://docs.djangoproject.com/en/dev/topics/auth/#other-authentication-sources
 
+3. Optional.
+   You can use your custom function to create user login tokens.
+   Just define in your project's ``settings.py``
+   ::
 
-3. Include the application's ``urls.py`` to your project.
+        DJANGO_LOGINURL_CREATE_TOKEN = 'your_project.your_app.module.function'
+
+
+   Custom function will be used to generation login tokens.
+   Don't forget to invalidate or migrate existing tokens!
+
+4. Include the application's ``urls.py`` to your project.
    ::
 
         urlpatterns = patterns('',
