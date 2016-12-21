@@ -1,6 +1,23 @@
 django-loginurl changelog
 =========================
 
+Version 0.3, 20 December 2016
+-----------------------------
+
+* PEP-8 code compliant and code style fixes
+* Added support for custom create_token function
+* Added test project for tests
+* setup.py now uses setuptools so you can easily install
+  package by `python setup.py develop` and run tests!
+
+  Previous changes made by other fork contributors:
+
+    * Added support for swappable user model by Marek Malek
+    * Added support for python 3 by Fajran Iman Rusadi
+    * Added django 1.8 support by Alexander Karpinsky
+    * Fixed django 1.6 compatibility by  Fajran Iman Rusadi
+    * Added timezone support by Marek Malek
+
 Version 0.2, 8 July 2013
 ------------------------
 
