@@ -9,29 +9,29 @@ from django.utils.module_loading import import_string
 from django.utils.http import int_to_base36
 
 
-create_token_path = getattr(settings, 'DJANGO_LOGINURL_CREATE_TOKEN', None)
+create_key_path = getattr(settings, 'DJANGO_LOGINURL_CREATE_KEY', None)
 
-if create_token_path:
-    _create_token = import_string(create_token_path)
+
+def _create_token(user):
+    """Create a unique token for a user.
+
+    The token is created from the user id and a unique id generated
+    from UUIDv4. Then both are hashed using MD5 digest algorithm.
+
+    """
+    _id = '{}-{}'.format(user.id, str(uuid.uuid4()))
+    _hash = hashlib.md5(_id.encode('ascii'))
+    return _hash.hexdigest()
+
+if create_key_path:
+    _create_token = import_string(create_key_path)
 else:
-    def _create_token(user):
-        """Create a unique token for a user.
+    def create_key(user):
+        token = _create_token(user)
+        b36_uid = int_to_base36(user.id)
+        key = '{}-{}'.format(b36_uid, token)
 
-        The token is created from the user id and a unique id generated
-        from UUIDv4. Then both are hashed using MD5 digest algorithm.
-
-        """
-        _id = '{}-{}'.format(user.id, str(uuid.uuid4()))
-        _hash = hashlib.md5(_id.encode('ascii'))
-        return _hash.hexdigest()
-
-
-def create_key(user):
-    token = _create_token(user)
-    b36_uid = int_to_base36(user.id)
-    key = '{}-{}'.format(b36_uid, token)
-
-    return key
+        return key
 
 
 def create(user, usage_left=1, expires=None, next=None):
