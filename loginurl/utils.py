@@ -19,18 +19,18 @@ def _create_token(user):
     from UUIDv4. Then both are hashed using MD5 digest algorithm.
 
     """
-    _id = '{}-{}'.format(user.id, str(uuid.uuid4()))
+    _id = f"{user.id}-{str(uuid.uuid4())}"
     _hash = hashlib.md5(_id.encode('ascii'))
     return _hash.hexdigest()
 
+
 if create_key_path:
-    _create_token = import_string(create_key_path)
+    create_key = import_string(create_key_path)
 else:
     def create_key(user):
         token = _create_token(user)
         b36_uid = int_to_base36(user.id)
-        key = '{}-{}'.format(b36_uid, token)
-
+        key = f"{b36_uid}-{token}"
         return key
 
 

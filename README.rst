@@ -44,7 +44,7 @@ Configuration
    Just define in your project's ``settings.py``
    ::
 
-        DJANGO_LOGINURL_CREATE_TOKEN = 'your_project.your_app.module.function'
+        DJANGO_LOGINURL_CREATE_KEY = 'your_project.your_app.module.function'
 
 
    Custom function will be used to generation login tokens.

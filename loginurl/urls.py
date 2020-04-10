@@ -1,8 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic import RedirectView
 from django.conf import settings
 
 from loginurl.views import cleanup, login
+
 
 urlpatterns = [
     url(r'^cleanup/$', cleanup),
